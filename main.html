@@ -171,7 +171,9 @@
                         this.pronounce();
                         let word = "";
                         try {
-                            word = await this.recognize();
+                            word = await Promise.race([
+                                new Promise(r => setTimeout(r, 70000, "")),
+                                this.recognize()]);
                         } catch (error) {};
                         console.log(word);
                         if (word.trim().toLowerCase() == this.words[this.current].n) {
