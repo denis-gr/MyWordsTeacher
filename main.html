@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1/font/bootstrap-icons.min.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="shortcut icon" href="maskable_icon_x192.png">
+</head>
+
+<body>
+    <main id="app" class="bg-secondary py-1" style="min-height: 100vh; display: flex; flex-direction: column;">
+        <nav class="navbar navbar-dark mb-4" style="border-bottom: 1px solid var(--bs-white);">
+            <div class="container">
+                <a class="navbar-brand" href="#">MyWordsTeacher</a>
+            </div>
+        </nav>
+        <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
+            v-if="screen == 'main'">
+            <div class="mb-3">
+                <label class="mb-3 w-100">
+                    <span class="form-label">Список слов (Word)</span>
+                    <textarea class="form-control" rows="3" v-model.lazy="allWordsText"></textarea>
+                </label>
+                <div class="input-group">
+                    <div class="input-group-text">Количество</div>
+                    <input class="form-control" title="Слово" v-model="countWords">
+                    <button type="submit" class="btn btn-primary" @click="iff">Начать</button>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="mb-3 w-100">
+                    <span class="form-label">Список слов (Word)</span>
+                    <textarea class="form-control" rows="3" v-model.lazy="allWordsText"></textarea>
+                </label>
+                <div class="input-group">
+                    <div class="input-group-text">Количество</div>
+                    <input class="form-control" title="Слово" v-model="countWords">
+                    <button type="submit" class="btn btn-primary" @click="otfn">Начать</button>
+                </div>
+            </div>
+        </div>
+        <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
+            v-if="screen == 'iff_word'">
+            <header style="border-bottom: 1px solid var(--bs-secondary);">
+                Прослушайте слово и напишите его
+            </header>
+            <div class="text-center bi bi-volume-up-fill btn" style="font-size: 5rem; display: block;"
+                title="Произнести слово" @click="pronounce"></div>
+            <p>Напишите слово, которое было сказанно</p>
+            <div class="row g-3">
+                <div class="col">
+                    <input class="form-control col" title="Слово" v-model="answer">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-3" ref="go">Готово</button>
+                </div>
+            </div>
+        </div>
+        <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
+            v-if="screen == 'iff_result'">
+            <header class="mb-3" style="border-bottom: 1px solid var(--bs-secondary);">
+                Прослушайте слово и напишите его
+            </header>
+            <table>
+                <tr v-for="(e, i) in words" :key="j">
+                    <td v-text="i + 1 + '. '"></td>
+                    <td v-text="e.f"></td>
+                    <td v-if="e.lff == 'Good'" class="text-success">Good</td>
+                    <td v-if="e.lff == 'Bad'" class="text-danger">Bad</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
+            v-if="screen == 'otfn_word'">
+            <header style="border-bottom: 1px solid var(--bs-secondary);">
+                Прослушайте слово, переведите и проиизнесите
+            </header>
+            <div class="text-center bi bi-volume-up-fill btn" style="font-size: 5rem; display: block;"
+                title="Произнести слово" @click="pronounce"></div>
+            <div class="text-center btn" style="display: block;" ref="otfn_btn">
+                <div v-if="data.your_word">
+                    <div style="font-size: 2rem" v-text="data.your_word"></div>
+                    <!--small>Нажмите, чтобы попробовать ещё раз</small-->
+                </div>
+                <div style="font-size: 3rem" v-else>Готов произнести</div>
+            </div>
+        </div>
+        <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
+            v-if="screen == 'otfn_result'">
+            <header class="mb-3" style="border-bottom: 1px solid var(--bs-secondary);">
+                Результаты
+            </header>
+            <table>
+                <tr v-for="(e, i) in words" :key="j">
+                    <td v-text="i + 1 + '. '"></td>
+                    <td v-text="e.f"></td>
+                    <td v-text="e.n"></td>
+                    <td v-if="e.lff == 'Good'" class="text-success">Good</td>
+                    <td v-if="e.lff == 'Bad'" class="text-danger">Bad</td>
+                </tr>
+            </table>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.min.js"></script>
+    <script src="main.js"></script>
+    <script>
+        function shuffle(arr) {
+            const array = [...arr];
+            for (let i = array.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        // iff - listenig and writing from f to f
+        // otfn - oral_translation from f to n
+
+        const app = Vue.createApp({
+            data: () => ({ answer: "", screen: "main", current: 0, countWords: 3, words: [], data: {} }),
+            methods: {
+                pronounce() {
+                    const temp = new SpeechSynthesisUtterance(this.words[this.current].f);
+                    temp.lang = "en"
+                    window.speechSynthesis.speak(temp);
+                },
+                async recognize_init() {
+                    const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const recognition = new speechRecognition();
+                    recognition.continuous = true;
+                    recognition.lang = 'ru-RU';
+                    recognition.start();
+                    return {
+                        get: () => new Promise(r => recognition.onresult = r).then(i => [...i.results].at(-1)[0].transcript),
+                        close: () => recognition.stop()
+                    };
+                },
+                async iff() {
+                    this.words = shuffle(this.words).slice(null, this.countWords);
+                    this.current = 0;
+                    this.screen = "iff_word";
+                    while (true) {
+                        if (this.current >= this.countWords) break;
+                        await new Promise(r => setTimeout(r, 500));
+                        this.pronounce();
+                        await new Promise(r => this.$refs.go.onclick = r);
+                        if (this.answer.trim().toLowerCase() == this.words[this.current].f) {
+                            this.words[this.current].lff = "Good";
+                        } else {
+                            this.words[this.current].lff = "Bad";
+                        };  
+                        this.answer = "";     
+                        this.current += 1;          
+                    };
+                    this.screen = "iff_result";
+                },
+                async otfn() {
+                    this.data.your_word = "";
+                    this.words = shuffle(this.words).slice(null, this.countWords);
+                    this.current = 0;
+                    this.screen = "otfn_word";
+                    const recognition = await this.recognize_init();
+                    while (true) {
+                        if (this.current >= this.countWords) break;
+                        await new Promise(r => setTimeout(r, 500));
+                        this.pronounce();
+                        const word = await recognition.get();
+                        console.log(word);
+                        if (word.trim().toLowerCase() == this.words[this.current].n) {
+                            this.words[this.current].lff = "Good";
+                        } else {
+                            this.words[this.current].lff = "Bad";
+                        };  
+                        this.answer = "";     
+                        this.current += 1;          
+                    };
+                    recognition.close();
+                    this.screen = "otfn_result";
+                },
+                save() {
+                    localStorage["allWordsText"] = this.allWordsText;
+                },
+            },
+            created() {
+                this.allWordsText = localStorage["allWordsText"];
+            },
+            computed: {
+                allWordsText: {
+                    get() {
+                        return this.words.map(i => `${i.f}:${i.n}`).join("\n");
+                    },
+                    set(newVal) {
+                        this.words = (newVal || "").split("\n").map(i => i.split(":")).map(e => ({
+                            f: e[0], n: e[1], lff: null, otfn: null }));
+                    },
+                },
+            },
+        }).mount('#app');
+        window.addEventListener("beforeunload", () => app.save()); 
+    </script>
+    <script>
+        navigator.serviceWorker.register('sw.js', { scope: '/TempTemp/'});
+    </script>    
+</body>
+
+</html>

@@ -1,0 +1,15 @@
+{
+    "short_name": "MyWordsTeacher",
+    "name": "MyWordsTeacher",
+    "display": "standalone",
+    "start_url": "/MyWordsTeacher/index.html",
+    "icons": [
+      {
+        "src": "maskable_icon_x192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      }
+    ],
+    "background_color": "#ffffff",
+    "scope": "/MyWordsTeacher/"
+}
