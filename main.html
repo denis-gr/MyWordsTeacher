@@ -161,7 +161,6 @@
                     this.screen = "iff_result";
                 },
                 async otfn() {
-                    alert(2111114);
                     this.data.your_word = "";
                     this.words = shuffle(this.words).slice(null, this.countWords);
                     this.current = 0;
@@ -170,11 +169,10 @@
                         if (this.current >= this.countWords) break;
                         await new Promise(r => setTimeout(r, 500));
                         this.pronounce();
+                        let word = "";
                         try {
-                            const word = await this.recognize();
-                        } catch (error) {
-                            const word = "jfsdflidaFLILIFA";
-                        };
+                            word = await this.recognize();
+                        } catch (error) {};
                         console.log(word);
                         if (word.trim().toLowerCase() == this.words[this.current].n) {
                             this.words[this.current].lff = "Good";
