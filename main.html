@@ -130,6 +130,7 @@
                     const temp = new SpeechSynthesisUtterance(this.words[this.current].f);
                     temp.lang = "en"
                     window.speechSynthesis.speak(temp);
+                    await new Promise(r => setInterval(() => window.speechSynthesis.speaking || r() ));
                 },
                 async recognize() {
                     const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -175,9 +176,7 @@
                         this.pronounce();
                         let word = "";
                         try {
-                            word = await Promise.race([
-                                new Promise(r => setTimeout(r, 70000, "")),
-                                this.recognize()]);
+                            word = await this.recognize();
                         } catch (error) {};
                         console.log(word);
                         if (word.trim().toLowerCase() == this.words[this.current].n) {
