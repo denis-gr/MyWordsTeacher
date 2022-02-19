@@ -17,6 +17,7 @@
         <nav class="navbar navbar-dark mb-4" style="border-bottom: 1px solid var(--bs-white);">
             <div class="container">
                 <a class="navbar-brand" href="#">MyWordsTeacher</a>
+                <i class="bi bi-record-circle-fill text-white" v-if="is_record"></i>
             </div>
         </nav>
         <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
@@ -50,7 +51,7 @@
                 Прослушайте слово и напишите его
             </header>
             <div class="text-center bi bi-volume-up-fill btn" style="font-size: 5rem; display: block;"
-                title="Произнести слово" @click="pronounce"></div>
+                title="Произнести слово" @click="data.onclick_btn_pronounce"></div>
             <p>Напишите слово, которое было сказанно</p>
             <div class="row g-3">
                 <div class="col">
@@ -82,7 +83,7 @@
                 Прослушайте слово, переведите и проиизнесите
             </header>
             <div class="text-center bi bi-volume-up-fill btn" style="font-size: 5rem; display: block;"
-                title="Произнести слово" @click="pronounce"></div>
+                title="Произнести слово" @click="data.onclick_btn_pronounce"></div>
             <div class="text-center btn" style="display: block;" ref="otfn_btn">
                 <div v-if="data.your_word">
                     <div style="font-size: 2rem" v-text="data.your_word"></div>
@@ -119,41 +120,43 @@
             }
             return array;
         };
+        async function pronounce(word, lang) {
+            const temp = new SpeechSynthesisUtterance(word);
+            temp.lang = lang;
+            window.speechSynthesis.speak(temp);
+            await new Promise(r => setInterval(() => window.speechSynthesis.speaking || r() ));
+        };
+        async function recognize(lang) {
+            const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new speechRecognition();
+            recognition.continuous = true;
+            recognition.lang = lang;
+            recognition.start();
+            const event = await new Promise(r => {
+                recognition.onresult = r;
+                recognition.onend = r;
+            });
+            if (event.type == "end") return "";
+            recognition.stop();
+            return  [...event.results].at(-1)[0].transcript || "";
+        };
+
 
         // iff - listenig and writing from f to f
         // otfn - oral_translation from f to n
 
         const app = Vue.createApp({
-            data: () => ({ answer: "", screen: "main", current: 0, countWords: 3, words: [], data: {} }),
+            data: () => ({ answer: "", screen: "main", current: 0, countWords: 3, words: [], data: {}, is_record: false }),
             methods: {
-                async pronounce() {
-                    const temp = new SpeechSynthesisUtterance(this.words[this.current].f);
-                    temp.lang = "en"
-                    window.speechSynthesis.speak(temp);
-                    await new Promise(r => setInterval(() => window.speechSynthesis.speaking || r() ));
-                },
-                async recognize() {
-                    const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                    const recognition = new speechRecognition();
-                    recognition.continuous = true;
-                    recognition.lang = 'ru-RU';
-                    recognition.start();
-                    const event = await new Promise(r => {
-                        recognition.onresult = r;
-                        recognition.onend = r;
-                    });
-                    if (event.type == "end") return "";
-                    recognition.stop();
-                    return  [...event.results].at(-1)[0].transcript;
-                },
                 async iff() {
+                    this.data.onclick_btn_pronounce = () => pronounce(this.words[this.current].f, "en");
                     this.words = shuffle(this.words).slice(null, this.countWords);
                     this.current = 0;
                     this.screen = "iff_word";
                     while (true) {
                         if (this.current >= this.countWords) break;
                         await new Promise(r => setTimeout(r, 500));
-                        await this.pronounce();
+                        await pronounce(this.words[this.current].f, "en");
                         await new Promise(r => this.$refs.go.onclick = r);
                         if (this.answer.trim().toLowerCase() == this.words[this.current].f) {
                             this.words[this.current].lff = "Good";
@@ -167,17 +170,19 @@
                 },
                 async otfn() {
                     this.data.your_word = "";
+                    this.data.onclick_btn_pronounce = () => pronounce(this.words[this.current].f, "en");
                     this.words = shuffle(this.words).slice(null, this.countWords);
                     this.current = 0;
-                    this.screen = "otfn_word"
+                    this.screen = "otfn_word";
                     while (true) {
                         if (this.current >= this.countWords) break;
                         await new Promise(r => setTimeout(r, 500));
-                        await this.pronounce();
-                        let word = "";
-                        try {
-                            word = await this.recognize();
-                        } catch (error) {};
+                        await pronounce(this.words[this.current].f, "en");
+                        this.data.onclick_btn_pronounce = () => {};
+                        this.is_record = true;
+                        let word = await recognize("ru");
+                        this.is_record = false;
+                        this.data.onclick_btn_pronounce = () => pronounce(this.words[this.current].f, "en");
                         console.log(word);
                         if (word.trim().toLowerCase() == this.words[this.current].n) {
                             this.words[this.current].lff = "Good";
