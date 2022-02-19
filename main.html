@@ -126,7 +126,7 @@
         const app = Vue.createApp({
             data: () => ({ answer: "", screen: "main", current: 0, countWords: 3, words: [], data: {} }),
             methods: {
-                pronounce() {
+                async pronounce() {
                     const temp = new SpeechSynthesisUtterance(this.words[this.current].f);
                     temp.lang = "en"
                     window.speechSynthesis.speak(temp);
@@ -153,7 +153,7 @@
                     while (true) {
                         if (this.current >= this.countWords) break;
                         await new Promise(r => setTimeout(r, 500));
-                        this.pronounce();
+                        await this.pronounce();
                         await new Promise(r => this.$refs.go.onclick = r);
                         if (this.answer.trim().toLowerCase() == this.words[this.current].f) {
                             this.words[this.current].lff = "Good";
@@ -173,7 +173,7 @@
                     while (true) {
                         if (this.current >= this.countWords) break;
                         await new Promise(r => setTimeout(r, 500));
-                        this.pronounce();
+                        await this.pronounce();
                         let word = "";
                         try {
                             word = await this.recognize();
