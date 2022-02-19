@@ -137,7 +137,11 @@
                     recognition.continuous = true;
                     recognition.lang = 'ru-RU';
                     recognition.start();
-                    const event = await new Promise(r => recognition.onresult = r);
+                    const event = await new Promise(r => {
+                        recognition.onresult = r;
+                        recognition.onend = r;
+                    });
+                    if (event.type == "end") return "";
                     recognition.stop();
                     return  [...event.results].at(-1)[0].transcript;
                 },
