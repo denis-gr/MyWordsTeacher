@@ -69,7 +69,7 @@
                 Прослушайте слово и напишите его
             </header>
             <table>
-                <tr v-for="(e, i) in words" :key="j">
+                <tr v-for="(e, i) in data.words" :key="j">
                     <td v-text="i + 1 + '. '"></td>
                     <td v-text="e.f"></td>
                     <td v-if="e.lff == 'Good'" class="text-success">Good</td>
@@ -99,12 +99,12 @@
                 Результаты
             </header>
             <table>
-                <tr v-for="(e, i) in words" :key="j">
+                <tr v-for="(e, i) in data.words" :key="j">
                     <td v-text="i + 1 + '. '"></td>
                     <td v-text="e.f"></td>
                     <td v-text="e.n"></td>
-                    <td v-if="e.lff == 'Good'" class="text-success">Good</td>
-                    <td v-if="e.lff == 'Bad'" class="text-danger">Bad</td>
+                    <td v-if="e.otfn == 'Good'" class="text-success">Good</td>
+                    <td v-if="e.otfn == 'Bad'" class="text-danger">Bad</td>
                 </tr>
             </table>
         </div>
@@ -151,19 +151,23 @@
             data: () => ({ answer: "", screen: "main", current: 0, countWords: 3, words: [], data: {}, is_record: false }),
             methods: {
                 async iff() {
-                    this.data.onclick_btn_pronounce = () => pronounce(this.words[this.current].f, "en");
-                    this.words = shuffle(this.words).slice(null, this.countWords);
+                    if (this.countWords >= this.words.length) {
+                        alert("Слов больше, чем есть в словаре");
+                        return
+                    };
+                    this.data.words = shuffle(this.words).slice(null, this.countWords);
+                    this.data.onclick_btn_pronounce = () => pronounce(this.data.words[this.current].f, "en");
                     this.current = 0;
                     this.screen = "iff_word";
                     while (true) {
                         if (this.current >= this.countWords) break;
                         await new Promise(r => setTimeout(r, 500));
-                        await pronounce(this.words[this.current].f, "en");
+                        await pronounce(this.data.words[this.current].f, "en");
                         await new Promise(r => this.$refs.go.onclick = r);
-                        if (this.answer.trim().toLowerCase() == this.words[this.current].f) {
-                            this.words[this.current].lff = "Good";
+                        if (this.answer.trim().toLowerCase() == this.data.words[this.current].f) {
+                            this.data.words[this.current].lff = "Good";
                         } else {
-                            this.words[this.current].lff = "Bad";
+                            this.data.words[this.current].lff = "Bad";
                         };
                         this.answer = "";
                         this.current += 1;
@@ -171,25 +175,29 @@
                     this.screen = "iff_result";
                 },
                 async otfn() {
+                    if (this.countWords >= this.words.length) {
+                        alert("Слов больше, чем есть в словаре");
+                        return
+                    };
                     this.data.your_word = "";
-                    this.data.onclick_btn_pronounce = () => pronounce(this.words[this.current].f, "en");
-                    this.words = shuffle(this.words).slice(null, this.countWords);
+                    this.data.words = shuffle(this.words).slice(null, this.countWords);
+                    this.data.onclick_btn_pronounce = () => pronounce(this.data.words[this.current].f, "en");
                     this.current = 0;
                     this.screen = "otfn_word";
                     while (true) {
                         if (this.current >= this.countWords) break;
                         await new Promise(r => setTimeout(r, 500));
-                        await pronounce(this.words[this.current].f, "en");
+                        await pronounce(this.data.words[this.current].f, "en");
                         this.data.onclick_btn_pronounce = () => { };
                         this.is_record = true;
                         let word = await recognize("ru");
                         this.is_record = false;
-                        this.data.onclick_btn_pronounce = () => pronounce(this.words[this.current].f, "en");
+                        this.data.onclick_btn_pronounce = () => pronounce(this.data.words[this.current].f, "en");
                         console.log(word);
-                        if (word.trim().toLowerCase() == this.words[this.current].n) {
-                            this.words[this.current].lff = "Good";
+                        if (word.trim().toLowerCase() == this.data.words[this.current].n) {
+                            this.data.words[this.current].otfn = "Good";
                         } else {
-                            this.words[this.current].lff = "Bad";
+                            this.data.words[this.current].otfn = "Bad";
                         };
                         this.answer = "";
                         this.current += 1;
