@@ -17,28 +17,47 @@
     <main id="app" class="bg-secondary" style="min-height: 100vh; display: flex; flex-direction: column;">
         <nav class="navbar navbar-dark mb-4" style="border-bottom: 1px solid var(--bs-white);">
             <div class="container">
-                <a class="navbar-brand" href="#">MyWordsTeacher</a>
+                <span class="navbar-brand me-0">MyWordsTeacher</span>
+                <a class="btn btn-text me-auto"><i class="bi bi-gear-fill text-white" @click="screen = 'settings'"></i></a>
                 <i class="bi bi-record-circle-fill text-white" v-if="is_record"></i>
             </div>
         </nav>
         <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
-            v-if="screen == 'main'">
+            v-if="screen == 'settings'">
+            <!--span class="btn btn-text" style="font-size: 1.25rem; font-weight: bolder">
+                <i class="bi bi-arrow-left-circle"></i>
+                Главное меню</span>
+            <hr-->
             <div class="mb-3">
-                <label class="mb-3 w-100">
-                    <span class="form-label">Список слов (Word)</span>
-                    <textarea class="form-control" rows="3" v-model.lazy="allWordsText"></textarea>
+                <label class="mb-3 w-100 form-check form-switch">
+                    <input class="form-check-input" type="checkbox" v-model="recognition_mode">
+                    <span class="form-label">Иной порядок распознания речи</span>
                 </label>
-                <div class="input-group">
-                    <div class="input-group-text">Количество</div>
-                    <input class="form-control" title="Слово" v-model="countWords">
-                    <button type="submit" class="btn btn-primary" @click="iff">Начать</button>
-                </div>
             </div>
             <div class="mb-3">
                 <label class="mb-3 w-100">
                     <span class="form-label">Список слов (Word)</span>
                     <textarea class="form-control" rows="3" v-model.lazy="allWordsText"></textarea>
                 </label>
+            </div>
+        </div>
+        <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
+            v-if="screen == 'main'">
+            <div class="mb-3">
+                <div class="input-group">
+                    <div class="input-group-text">Количество</div>
+                    <input class="form-control" title="Слово" v-model="countWords">
+                    <button type="submit" class="btn btn-primary" @click="lff">Начать</button>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="input-group">
+                    <div class="input-group-text">Количество</div>
+                    <input class="form-control" title="Слово" v-model="countWords">
+                    <button type="submit" class="btn btn-primary" @click="lfn">Начать</button>
+                </div>
+            </div>
+            <div class="mb-3">
                 <div class="input-group">
                     <div class="input-group-text">Количество</div>
                     <input class="form-control" title="Слово" v-model="countWords">
@@ -47,7 +66,7 @@
             </div>
         </div>
         <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
-            v-if="screen == 'iff_word'">
+            v-if="screen == 'lff_word'">
             <header style="border-bottom: 1px solid var(--bs-secondary);">
                 Прослушайте слово и напишите его
             </header>
@@ -64,7 +83,7 @@
             </div>
         </div>
         <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
-            v-if="screen == 'iff_result'">
+            v-if="screen == 'lff_result'">
             <header class="mb-3" style="border-bottom: 1px solid var(--bs-secondary);">
                 Прослушайте слово и напишите его
             </header>
@@ -76,6 +95,46 @@
                     <td v-if="e.lff == 'Bad'" class="text-danger">Bad</td>
                 </tr>
             </table>
+            <div class="btn-group mt-3">
+                <button type="button" class="btn btn-primary" @click="data.onclick_btn_repeat_all">Повторить всё</button>
+                <button type="button" class="btn btn-primary" @click="data.onclick_btn_repeat_part">Повторить плохие</button>
+            </div>
+        </div>
+        <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
+            v-if="screen == 'lfn_word'">
+            <header style="border-bottom: 1px solid var(--bs-secondary);">
+                Прослушайте слово и напишите его на своём языке
+            </header>
+            <div class="text-center bi bi-volume-up-fill btn" style="font-size: 5rem; display: block;"
+                title="Произнести слово" @click="data.onclick_btn_pronounce"></div>
+            <p>Напишите слово, которое было сказанно</p>
+            <div class="row g-3">
+                <div class="col">
+                    <input class="form-control col" title="Слово" v-model="answer">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-3" ref="go">Готово</button>
+                </div>
+            </div>
+        </div>
+        <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
+            v-if="screen == 'lfn_result'">
+            <header class="mb-3" style="border-bottom: 1px solid var(--bs-secondary);">
+                Прослушайте слово и напишите его
+            </header>
+            <table>
+                <tr v-for="(e, i) in data.words" :key="j">
+                    <td v-text="i + 1 + '. '"></td>
+                    <td v-text="e.f"></td>
+                    <td v-text="e.n"></td>
+                    <td v-if="e.lfn == 'Good'" class="text-success">Good</td>
+                    <td v-if="e.lfn == 'Bad'" class="text-danger">Bad</td>
+                </tr>
+            </table>
+            <div class="btn-group mt-3">
+                <button type="button" class="btn btn-primary" @click="data.onclick_btn_repeat_all">Повторить всё</button>
+                <button type="button" class="btn btn-primary" @click="data.onclick_btn_repeat_part">Повторить плохие</button>
+            </div>
         </div>
 
         <div class="container mx-auto bg-white p-4" style="display: inline-block; border-radius: 10px;"
@@ -107,10 +166,14 @@
                     <td v-if="e.otfn == 'Bad'" class="text-danger">Bad</td>
                 </tr>
             </table>
+            <div class="btn-group mt-3">
+                <button type="button" class="btn btn-primary" @click="data.onclick_btn_repeat_all">Повторить всё</button>
+                <button type="button" class="btn btn-primary" @click="data.onclick_btn_repeat_part">Повторить плохие</button>
+            </div>
         </div>
 
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.min.js"></script> <!-- TODO: add new mode -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.min.js"></script>
     <script src="main.js"></script>
     <script>
@@ -124,7 +187,7 @@
                     this.recognition = new speechRecognition();
                     this.recognition.continuous = true;
                     this.recognition.lang = this.recognition_lang;
-                    if (this.flag) {
+                    if (this.flag && this.onchangerecognitionstatus) {
                         this.onchangerecognitionstatus(true);
                         this.recognition.start();
                     };
@@ -137,7 +200,7 @@
                 await new Promise(r => setInterval(() => window.speechSynthesis.speaking || r()));
             };
             async recognize() {
-                if (!this.flag) {
+                if (!this.flag && this.onchangerecognitionstatus) {
                     this.onchangerecognitionstatus(true);
                     this.recognition.start();
                 };
@@ -146,14 +209,14 @@
                     this.recognition.onend = r;
                 });
                 if (event.type == "end") return "";
-                if (!this.flag) {
+                if (!this.flag && this.onchangerecognitionstatus) {
                     this.onchangerecognitionstatus(false);
                     this.recognition.stop();
                 };
                 return [...event.results].at(-1)[0].transcript || "";
             };
             async close() {
-                if (this.flag) {
+                if (this.flag && this.onchangerecognitionstatus) {
                     this.onchangerecognitionstatus(false);
                     this.recognition.stop();
                 };
@@ -172,7 +235,7 @@
         };
       
 
-        // iff - listenig and writing from f to f
+        // lff - listenig and writing from f to f
         // otfn - oral_translation from f to n
 
         const app = Vue.createApp({
@@ -181,68 +244,131 @@
                 onchangerecognitionstatus(status) {
                     this.is_record = status;
                 },
-                async iff() {
+                async lff() {
                     if (this.countWords >= this.words.length) {
                         alert("Слов больше, чем есть в словаре");
                         return
                     };
+                        const my_speech = new MySpeechAPI(this.recognition_mode);
                     this.data.words = shuffle(this.words).slice(null, this.countWords);
-                    this.current = 0;
-                    this.screen = "iff_word";
-                    const my_speech = new MySpeechAPI(this.recognition_mode, "en_UK", this.onchangerecognitionstatus);
-                    this.data.onclick_btn_pronounce = () => my_speech.pronounce(this.data.words[this.current].f, "en");
                     while (true) {
-                        if (this.current >= this.countWords) break;
-                        await new Promise(r => setTimeout(r, 500));
-                        await my_speech.pronounce(this.data.words[this.current].f, "en");
-                        await new Promise(r => this.$refs.go.onclick = r);
-                        if (this.answer.trim().toLowerCase() == this.data.words[this.current].f) {
-                            this.data.words[this.current].lff = "Good";
-                        } else {
-                            this.data.words[this.current].lff = "Bad";
+                        this.current = 0;
+                        this.screen = "lff_word";
+                        this.data.onclick_btn_pronounce = () => my_speech.pronounce(this.data.words[this.current].f, "en");
+                        while (true) {
+                            if (this.current >= this.countWords) break;
+                            await new Promise(r => setTimeout(r, 500));
+                            await my_speech.pronounce(this.data.words[this.current].f, "en");
+                            await new Promise(r => this.$refs.go.onclick = r);
+                            if (this.answer.trim().toLowerCase() == this.data.words[this.current].f) {
+                                this.data.words[this.current].lff = "Good";
+                            } else {
+                                this.data.words[this.current].lff = "Bad";
+                            };
+                            this.answer = "";
+                            this.current += 1;
                         };
-                        this.answer = "";
-                        this.current += 1;
+                        this.screen = "lff_result";
+                        const is_all = await new Promise(r => {
+                            this.data.onclick_btn_repeat_part = () => r(false);
+                            this.data.onclick_btn_repeat_all = () => r(true);
+                        });
+                        if (is_all) {
+                            this.data.words = shuffle(this.data.words); 
+                        } else {
+                            this.data.words = shuffle(this.data.words).filter(i => i.lff != "Good"); 
+                        };
+                        this.countWords = this.data.words.length;
                     };
                     my_speech.close();
-                    this.screen = "iff_result";
+                },
+                async lfn() {
+                    if (this.countWords >= this.words.length) {
+                        alert("Слов больше, чем есть в словаре");
+                        return
+                    };
+                        const my_speech = new MySpeechAPI(this.recognition_mode);
+                    this.data.words = shuffle(this.words).slice(null, this.countWords);
+                    while (true) {
+                        this.current = 0;
+                        this.screen = "lfn_word";
+                        this.data.onclick_btn_pronounce = () => my_speech.pronounce(this.data.words[this.current].f, "en");
+                        while (true) {
+                            if (this.current >= this.countWords) break;
+                            await new Promise(r => setTimeout(r, 500));
+                            await my_speech.pronounce(this.data.words[this.current].f, "en");
+                            await new Promise(r => this.$refs.go.onclick = r);
+                            if (this.answer.trim().toLowerCase() == this.data.words[this.current].n) {
+                                this.data.words[this.current].lfn = "Good";
+                            } else {
+                                this.data.words[this.current].lfn = "Bad";
+                            };
+                            this.answer = "";
+                            this.current += 1;
+                        };
+                        this.screen = "lfn_result";
+                        const is_all = await new Promise(r => {
+                            this.data.onclick_btn_repeat_part = () => r(false);
+                            this.data.onclick_btn_repeat_all = () => r(true);
+                        });
+                        if (is_all) {
+                            this.data.words = shuffle(this.data.words); 
+                        } else {
+                            this.data.words = shuffle(this.data.words).filter(i => i.lfn != "Good"); 
+                        };
+                        this.countWords = this.data.words.length;
+                    };
+                    my_speech.close();
                 },
                 async otfn() {
-                    if (this.countWords >= this.words.length) {
+                    if (this.countWords > this.words.length) {
                         alert("Слов больше, чем есть в словаре");
                         return
                     };
-                    this.data.your_word = "";
-                    this.data.words = shuffle(this.words).slice(null, this.countWords);
-                    this.current = 0;
-                    this.screen = "otfn_word";
                     const my_speech = new MySpeechAPI(this.recognition_mode, "ru_RU", this.onchangerecognitionstatus);
-                    this.data.onclick_btn_pronounce = () => my_speech.pronounce(this.data.words[this.current].f, "en");
+                    this.data.words = shuffle(this.words).slice(null, this.countWords);
                     while (true) {
-                        if (this.current >= this.countWords) break;
-                        await new Promise(r => setTimeout(r, 500));
-                        await my_speech.pronounce(this.data.words[this.current].f, "en");
-                        this.data.onclick_btn_pronounce = () => { };
-                        let word = await my_speech.recognize();
+                        this.current = 0;
+                        this.screen = "otfn_word";
                         this.data.onclick_btn_pronounce = () => my_speech.pronounce(this.data.words[this.current].f, "en");
-                        console.log(word);
-                        if (word.trim().toLowerCase() == this.data.words[this.current].n) {
-                            this.data.words[this.current].otfn = "Good";
-                        } else {
-                            this.data.words[this.current].otfn = "Bad";
+                        while (true) {
+                            if (this.current >= this.countWords) break;
+                            await new Promise(r => setTimeout(r, 500));
+                            await my_speech.pronounce(this.data.words[this.current].f, "en");
+                            this.data.onclick_btn_pronounce = () => { };
+                            let word = await my_speech.recognize();
+                            this.data.onclick_btn_pronounce = () => my_speech.pronounce(this.data.words[this.current].f, "en");
+                            console.log(word);
+                            if (word.trim().toLowerCase() == this.data.words[this.current].n) {
+                                this.data.words[this.current].otfn = "Good";
+                            } else {
+                                this.data.words[this.current].otfn = "Bad";
+                            };
+                            this.answer = "";
+                            this.current += 1;
                         };
-                        this.answer = "";
-                        this.current += 1;
+                        this.screen = "otfn_result";
+                        const is_all = await new Promise(r => {
+                            this.data.onclick_btn_repeat_part = () => r(false);
+                            this.data.onclick_btn_repeat_all = () => r(true);
+                        });
+                        if (is_all) {
+                            this.data.words = shuffle(this.data.words); 
+                        } else {
+                            this.data.words = shuffle(this.data.words).filter(i => i.otfn != "Good"); 
+                        };  
+                        this.countWords = this.data.words.length;
                     };
                     my_speech.close();
-                    this.screen = "otfn_result";
                 },
                 save() {
                     localStorage["allWordsText"] = this.allWordsText;
+                    localStorage["recognition_mode"] = this.recognition_mode;
                 },
             },
             created() {
                 this.allWordsText = localStorage["allWordsText"];
+                this.recognition_mode = localStorage["recognition_mode"];
             },
             computed: {
                 allWordsText: {
