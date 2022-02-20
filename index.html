@@ -180,6 +180,7 @@
         class MySpeechAPI {
             constructor(flag, recognition_lang, onchangerecognitionstatus) {
                 this.flag = flag;
+                if (this.flag == "false") this.flag = false;
                 this.recognition_lang = recognition_lang;
                 this.onchangerecognitionstatus = onchangerecognitionstatus;
                 if (this.recognition_lang) {
