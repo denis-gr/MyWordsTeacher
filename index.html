@@ -418,7 +418,7 @@
                         while (true) {
                             if (this.current >= this.countWords) break;
                             await new Promise(r => setTimeout(r, 500));
-                            await my_speech.pronounce(this.data.words[this.current].n, "en");
+                            await my_speech.pronounce(this.data.words[this.current].n, "ru");
                             this.data.onclick_btn_pronounce = () => { };
                             let word = await my_speech.recognize();
                             this.data.onclick_btn_pronounce = () => my_speech.pronounce(this.data.words[this.current].n, "ru");
@@ -431,7 +431,7 @@
                             this.answer = "";
                             this.current += 1;
                         };
-                        this.screen = "otnt_result";
+                        this.screen = "otnf_result";
                         const is_all = await new Promise(r => {
                             this.data.onclick_btn_repeat_part = () => r(false);
                             this.data.onclick_btn_repeat_all = () => r(true);
@@ -461,7 +461,7 @@
                     },
                     set(newVal) {
                         this.words = (newVal || "").split("\n").map(i => i.split(":")).map(e => ({
-                            f: e[0], n: e[1], lff: null, otfn: null
+                            f: e[0], n: e[1], lff: null, otfn: null, otnf: null,
                         }));
                     },
                 },
